@@ -2,8 +2,10 @@
 const express = require("express")
 const server = express()
 
+const db = require("./db")
+
 //coleção de ideias
-const ideas = [
+/* const ideas = [
     {
         img: "https://image.flaticon.com/icons/svg/2729/2729007.svg",
         title: "Curso de Programação",
@@ -46,7 +48,7 @@ const ideas = [
         description: "Lorem ipsum dolor sit, amet consectetur adipisicing elit.",
         url: "http://rocketseat.com.br"
     },
-]
+] */
 
 
 
@@ -67,23 +69,37 @@ nunjucks.configure("views", {
 //e capturo o pedido do cliente para responder
 server.get("/", function(req, res) {
     
-    const reversedIdeas = [...ideas].reverse()
+    db.all(`SELECT * FROM ideas`, function(err, rows) {
+        if (err) {
+            console.log(err)
+            return res.send("Erro no banco de dados!")
+        }
 
-    let lastIdeas = []
-    for (let idea of reversedIdeas){
-        if (lastIdeas.length < 2){
-            lastIdeas.push(idea)
+        const reversedIdeas = [...rows].reverse()
+
+        let lastIdeas = []
+        for (let idea of reversedIdeas){
+            if (lastIdeas.length < 2){
+                lastIdeas.push(idea)
         }
     }
 
     return res.render("index.html", {ideas: lastIdeas})
+    })
+    
+    
 })
 
 server.get("/ideias", function(req, res) {
-    
-    const reversedIdeas = [...ideas].reverse()
-    
-    return res.render("ideias.html", {ideas: reversedIdeas})
+    db.all(`SELECT * FROM ideas`, function(err, rows) {
+        if (err) {
+            console.log(err)
+            return res.send("Erro no banco de dados!")
+        }
+        
+        const reversedIdeas = [...rows].reverse()
+        return res.render("ideias.html", {ideas: reversedIdeas})
+    })
 })
 
 // liguei meu servidor na porta 3000
